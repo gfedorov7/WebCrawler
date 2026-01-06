@@ -20,13 +20,15 @@ func main() {
 		fmt.Println(err)
 		return
 	}
-	hrefs := parser.HtmlHrefParser(body)
 
+	hrefs := parser.HtmlHrefParser(body)
+	var validHrefs []string
 	for _, href := range hrefs {
 		v := normalizer.ParseUrl(consoleFlag.Depth, consoleFlag.Url, href)
 		if v == "" {
 			continue
 		}
-		fmt.Println(v)
+		validHrefs = append(validHrefs, v)
 	}
+
 }
