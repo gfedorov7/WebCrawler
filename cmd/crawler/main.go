@@ -2,6 +2,7 @@ package main
 
 import (
 	"WebCrawler/cmd/internal/fetcher"
+	"WebCrawler/cmd/internal/normalizer"
 	"WebCrawler/cmd/internal/parser"
 	"fmt"
 )
@@ -20,5 +21,12 @@ func main() {
 		return
 	}
 	hrefs := parser.HtmlHrefParser(body)
-	fmt.Println(hrefs)
+
+	for _, href := range hrefs {
+		v := normalizer.ParseUrl(consoleFlag.Depth, consoleFlag.Url, href)
+		if v == "" {
+			continue
+		}
+		fmt.Println(v)
+	}
 }
