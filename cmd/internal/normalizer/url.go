@@ -1,35 +1,45 @@
 package normalizer
 
-import "strings"
+import (
+	"strings"
+)
 
 const countProtocolSlash = 2
 
 func ParseUrl(depth int, startUrl, body string) (url string) {
-	if strings.Trim(body, " ") == "" || strings.Count(body, "#") > 0 {
+	if depth == 0 {
+		return startUrl
+	}
+
+	if strings.TrimSpace(body) == "" || strings.Count(body, "#") > 0 {
 		return ""
 	}
 
-	li := strings.LastIndex(body, "/")
-	if li != len(body)-1 {
-		body += "/"
-	}
-
-	if strings.HasPrefix(body, "http") {
-		countSlash := strings.Count(body, "/")
-		if countSlash-countProtocolSlash > depth {
-			return ""
+	if !strings.HasPrefix(body, "http") {
+		li := strings.LastIndex(startUrl, "/")
+		if li != len(startUrl)-1 {
+			startUrl += "/"
 		}
-		return body
+		if body[0] == '/' {
+			body = body[1:]
+		}
+
+		url = startUrl + body
+	} else {
+		url = body
 	}
 
-	li = strings.LastIndex(startUrl, "/")
-	if li != len(startUrl)-1 {
-		startUrl += "/"
-	}
-	i := strings.Index(body, "/")
-	if i == 0 {
-		body = body[1:]
+	li := strings.LastIndex(url, "/")
+	if li == len(url)-1 {
+		url = url[:li]
 	}
 
-	return startUrl + body
+	if CountDepth(url) > depth {
+		return ""
+	}
+	return
+}
+
+func CountDepth(url string) int {
+	return strings.Count(url, "/") - countProtocolSlash
 }

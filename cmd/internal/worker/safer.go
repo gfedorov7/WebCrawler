@@ -5,33 +5,28 @@ import (
 )
 
 type SafeURLCollection struct {
-	mux  sync.RWMutex
+	mux  sync.Mutex
 	urls map[string]struct{}
 }
 
 func (s *SafeURLCollection) Len() int {
-	s.mux.RLock()
-	defer s.mux.RUnlock()
+	s.mux.Lock()
+	defer s.mux.Unlock()
 	return len(s.urls)
 }
 
-func (s *SafeURLCollection) Add(url string) {
+func (s *SafeURLCollection) AddIfNotExists(url string) bool {
 	s.mux.Lock()
 	defer s.mux.Unlock()
+
 	if s.urls == nil {
 		s.urls = make(map[string]struct{})
 	}
-	if _, exists := s.urls[url]; !exists {
-		s.urls[url] = struct{}{}
-	}
-}
 
-func (s *SafeURLCollection) Exists(url string) bool {
-	s.mux.RLock()
-	defer s.mux.RUnlock()
-	if s.urls == nil {
+	if _, exists := s.urls[url]; exists {
 		return false
 	}
-	_, ok := s.urls[url]
-	return ok
+
+	s.urls[url] = struct{}{}
+	return true
 }
